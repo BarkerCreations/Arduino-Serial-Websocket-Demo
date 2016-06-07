@@ -1,0 +1,81 @@
+<html>
+	<head>
+		<title>Arduino Websocket Touch Demo</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<style type="text/css">
+			html,body {
+				margin:0;
+				padding:0;
+				width:100%;
+				height:100%;
+			}
+
+			.divPageBody {
+				background-color: red;
+				width:100%;
+				min-height:100%;
+				margin:0;
+				padding:0;
+				padding-top: 100px;
+				box-sizing:border-box;
+			}
+
+			#touchText {
+				color:white;
+				font-size: 70px;
+				width:100%;
+				text-align: center;
+				margin:0;
+			}
+		</style>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script> 
+		<script>
+			var mySocket = undefined;
+			var urlMySocket = "ws://barker-creations.co.uk:8001";
+			
+			function startConnection () {
+				mySocket = new WebSocket (urlMySocket); 
+				mySocket.onopen = function (evt) {
+					console.log ("mySocket is open.");
+					$('.divPageBody').css('background-color', 'green');
+				};
+				mySocket.onmessage = function (evt) {
+					if (evt.data === "TOUCHED") {
+						$('#touchText').text("TOUCHED");
+						setTimeout(function() {
+							$('#touchText').text("NO TOUCH");
+						}, 250);
+					}
+				};
+				mySocket.onclose = function (evt) {
+					console.log ("mySocket was closed.");
+					mySocket = undefined;
+				};
+				mySocket.onerror = function (evt) {
+					console.log (evt);
+				};
+			}
+
+			function everySecond () {
+				if (mySocket === undefined) { //try to open the connection
+					startConnection ();
+					$('.divPageBody').css('background-color', 'red');
+				}
+			}
+
+			function startup () {
+				console.log ("startup");
+				setInterval (everySecond, 1000); 
+			}
+			</script>
+		</head>
+	<body>
+		<div class="divPageBody">
+			<p id="touchText">NO TOUCH</p>
+		</div>
+		<script>
+			startup ();
+			</script>
+		</body>
+	</html>
